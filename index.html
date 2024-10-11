@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Ithalo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('/img/background1.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        header {
+            background: #13031a;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            flex: 1;
+            padding-bottom: 20px;
+        }
+        .search {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .search input {
+            padding: 10px;
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .search button {
+            padding: 10px 15px;
+            background: #130213;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .search button:hover {
+            background: #46a;
+        }
+        .books {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .book-card {
+            background: #ffffff;
+            color: black;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+            width: 200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+        .book-card img {
+            width: 100%;
+            height: auto;
+        }
+        .book-card h5 {
+            margin: 10px;
+            font-size: 18px;
+            color: #35424a;
+        }
+        .book-card p {
+            margin: 10px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 10px;
+            background: #35424a;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px auto;
+            width: 80%;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #46a;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #13031a;
+            color: #ffffff;
+            width: 100%;
+        }
+        .back-btn, .log-btn {
+            background: #46a;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .back-btn:hover, .log-btn:hover {
+            background: #35424a;
+        }
+        #modal-logs {
+            position: fixed;
+            background-color: rgba(255, 255, 255, 0.9);
+            background-image: url('/img/logbackground.webp');
+            background-size: cover;
+            background-position: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            z-index: 1000;
+            color: rgb(226, 221, 221);
+            display: none; 
+            max-height: 70%;
+            overflow-y: auto;
+        }
+        #modal-logs ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #modal-logs li {
+            margin: 10px 0;
+        }
+        #btn-fechar-modal {
+            padding: 10px 15px;
+            background: #35424a;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #btn-fechar-modal:hover {
+            background: #46a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Biblioteca Online</h1>
+    </header>
+    <div class="container">
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Pesquisar livros...">
+            <button id="searchBtn">Buscar</button>
+        </div>
+        <button class="back-btn" id="backBtn" style="display: none;">Voltar para a Página Principal</button>
+        <button class="log-btn" id="btn-exibir-logs">Exibir Logs</button>
+        <div id="books" class="books"></div>
+    </div>
+    <div id="modal-logs">
+        <h2>Logs Registrados</h2>
+        <ul id="lista-logs"></ul>
+        <button id="btn-fechar-modal">Fechar</button>
+    </div>
+    <footer>
+        <p>Ithalo C. Lanzarini Gob. Fundamentos ao desenvolvimento WEB.</p>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchBtn = document.getElementById("searchBtn");
+            const searchInput = document.getElementById("searchInput");
+            const booksContainer = document.getElementById("books");
+            const backBtn = document.getElementById("backBtn");
+            const modalLogs = document.getElementById("modal-logs");
+            const listaLogs = document.getElementById("lista-logs");
+
+            function displayBooks(books) {
+                booksContainer.innerHTML = ""; 
+                books.forEach(book => {
+                    const bookDiv = document.createElement("div");
+                    bookDiv.classList.add("book-card");
+                    const imageLink = book.volumeInfo.imageLinks ? 
+                        `${book.volumeInfo.imageLinks.thumbnail.replace(/s\d+/, 'q')}` : 
+                        'https://via.placeholder.com/200x300';
+        
+                    bookDiv.innerHTML = `
+                        <img src="${imageLink}" alt="${book.volumeInfo.title}">
+                        <h5>${book.volumeInfo.title}</h5>
+                        <p>Autor: ${book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Desconhecido"}</p>
+                        <p>Publicado em: ${book.volumeInfo.publishedDate ? book.volumeInfo.publishedDate : "Desconhecido"}</p>
+                        <a href="${book.volumeInfo.infoLink}" class="btn" target="_blank">Comprar</a>
+                    `;
+                    booksContainer.appendChild(bookDiv);
+                });
+                backBtn.style.display = "block"; 
+            }
+
+            function registrarLog(query, numResultados, status) {
+                const logs = JSON.parse(localStorage.getItem('logs')) || [];
+                const logData = {
+                    id: Date.now(), 
+                    timestamp: new Date().toISOString(),
+                    query: query,
+                    numResultados: numResultados,
+                    status: status
+                };
+                logs.push(logData);
+                localStorage.setItem('logs', JSON.stringify(logs));
+            }
+
+            async function fetchBooks(query) {
+                try {
+                    const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
+                    const status = response.ok ? 'success' : 'error';
+                    const data = await response.json();
+                    const numResultados = data.items ? data.items.length : 0;
+                    registrarLog(query, numResultados, status);
+                    
+                    if (data.items) {
+                        displayBooks(data.items);
+                    } else {
+                        booksContainer.innerHTML = "<p>Nenhum livro encontrado.</p>";
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    registrarLog(query, 0, 'error');
+                }
+            }
+
+            searchBtn.addEventListener("click", function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    fetchBooks(query);
+                }
+            });
+
+            backBtn.addEventListener("click", function() {
+                booksContainer.innerHTML = ""; 
+                searchInput.value = ""; 
+                backBtn.style.display = "none"; 
+                loadInitialBooks(); 
+            });
+
+            function loadInitialBooks() {
+                fetchBooks("programação");
+            }
+
+            loadInitialBooks();
+
+            function exibirLogs() {
+                const logs = JSON.parse(localStorage.getItem('logs')) || [];
+                listaLogs.innerHTML = ""; 
+                logs.forEach(log => {
+                    const logItem = document.createElement("li");
+                    logItem.innerHTML = `${log.timestamp} - ${log.query} - Resultados: ${log.numResultados} - Status: ${log.status} <button onclick="excluirLog(${log.id})">Excluir</button>`;
+                    listaLogs.appendChild(logItem);
+                });
+                modalLogs.style.display = 'block';
+            }
+
+            document.getElementById('btn-exibir-logs').addEventListener('click', exibirLogs);
+
+            window.excluirLog = function(logId) {
+                let logs = JSON.parse(localStorage.getItem('logs')) || [];
+                logs = logs.filter(log => log.id !== logId); 
+                localStorage.setItem('logs', JSON.stringify(logs));
+                exibirLogs(); 
+            }
+
+            document.getElementById('btn-fechar-modal').addEventListener('click', () => {
+                modalLogs.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
